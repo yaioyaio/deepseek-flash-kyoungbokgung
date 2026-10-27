@@ -1,36 +1,200 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 경복궁 3D · Gyeongbokgung in 3D
 
-## Getting Started
+브라우저에서 경복궁을 3D로 돌려 보는 인터랙티브 웹 전시입니다. 전각을 클릭하면
+카메라가 그 건물로 날아가고, 하단의 **부품 분해** 슬라이더로 건물을 **기단에서
+용마루까지 서른 부재**로 분해했다가 다시 조립할 수 있습니다. 중층 전각은
+하층(기단~하층 막새) · 상층(상층 마루~상층 막새) · 용마루 세 묶음으로 나뉩니다.
 
-First, run the development server:
+- 모든 3D 형상은 **Blender 파이썬 스크립트로 절차 생성**했고, 텍스처 역시
+  **PIL/numpy로 절차 생성**했습니다. 외부 3D 모델·이미지 에셋은 쓰지 않습니다.
+- 렌더링은 **Three.js**(WebGL2)가 담당하고, UI·라우팅·정적 최적화는
+  **Next.js 16 App Router**가 맡습니다.
+- 조명은 **낮 / 노을 / 밤** 세 가지 시간대를 실시간 보간하며, 밤에는 창호와
+  등롱이 은은하게 빛납니다.
+
+## 시작하기
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
+npm run build        # 프로덕션 빌드
+npm start            # 빌드 결과 실행
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Node.js 20+ 와 WebGL2를 지원하는 브라우저가 필요합니다. 첫 로딩에서
+`public/models/gyeongbokgung.glb`(약 27MB)를 스트리밍으로 내려받으며,
+진행률이 로딩 화면에 표시됩니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 조작법
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 동작 | 설명 |
+| --- | --- |
+| 드래그 | 궤도 회전 |
+| 휠 / 핀치 | 확대·축소 |
+| 전각 클릭 | 해당 전각으로 카메라 이동 + 상세 패널 |
+| 하단 **분해** 슬라이더 | 0%(조립) ~ 100%(부재 하나하나로 분해) · 분해 중 주변 전각은 흐려짐 |
+| 우측 **PARTS** 레일 | 한 부재만 실물로 남기고 나머지는 구조선(와이어프레임)으로 표시 · 없는 부재는 안내 표시 |
+| 우측 상단 해·달 아이콘 | 낮 / 노을 / 밤 |
+| 좌측 상단 눈 아이콘 | 전각 이름표 표시 전환 |
+| 우측 하단 프리셋 | 전체 · 조감 · 남측 · 동측 · 서측 · 북측 |
 
-## Learn More
+## 기술 스택
 
-To learn more about Next.js, take a look at the following resources:
+- **Next.js 16.4.3** (App Router, React 19, `cacheComponents`, `partialPrefetching`)
+- **Three.js 0.186** — `OrbitControls`, `GLTFLoader`, 자체 스카이 셰이더
+- **Tailwind CSS 4** (`@tailwindcss/turbopack`)
+- **Motion** (패널·토스트 전환), **lucide-react** (아이콘)
+- **Blender 5.2** + Python (`blender/scripts`), **Pillow·numpy** (`tools/gen_textures.py`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 3D 에셋 파이프라인
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+tools/gen_textures.py            →  public/textures/*.jpg   (기와·석재·단청·창호 …)
+blender/scripts/geo.py           →  재질, 메시 빌더 유틸
+blender/scripts/build_scene.py   →  public/models/gyeongbokgung.glb
+                                    public/models/scene-meta.json
+blender/scripts/preview.py       →  blender/renders/*.png   (PREVIEW=1)
+```
 
-## Deploy on Vercel
+```bash
+# 1) 텍스처 생성
+python3 tools/gen_textures.py
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 2) 씬 빌드 + GLB / 메타데이터 내보내기 (헤드리스)
+blender -b --factory-startup -P blender/scripts/build_scene.py
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 3) (선택) EEVEE 프리뷰 렌더
+PREVIEW=1 blender -b --factory-startup -P blender/scripts/build_scene.py
+```
+
+### 좌표계
+
+Blender는 `+X` 동, `+Y` 북, `+Z` 위를 씁니다. glTF로 내보내면 `Y`와 `Z`가
+바뀌므로 뷰어에서는 `three.position = (bx, bz, -by)`로 변환합니다. 광화문은
+`blender y = -156` → `three z = +156`(남쪽)에 놓입니다.
+
+### 서른 개의 부재 레이어
+
+목조 건물을 실제로 해체하는 순서(지붕 → 서까래·도리 → 공포 → 기둥 → 초석)의
+역순으로 쌓아, 아래에서 위로 **서른 부재**로 나눴습니다. 부재 이름은 《경복궁》
+실측 도면과 목조 건축 용어(창방·평방·주두·살미·도리·장혀·대공·부연·추녀·사래)를
+따랐습니다.
+
+지붕은 골조와 기와를 나눴습니다. 지붕 골조(개판·산자·진흙)가 곡면을 만들고,
+그 위에 기와면(암키와·수키와)과 처마 끝의 막새·와당이 얹힙니다. 중층
+전각(광화문 · 근정전 · 경회루 · 향원정)은 하층 지붕 위에 다시 기둥과 공포,
+지붕이 얹히므로 16번(하층 막새) 뒤에 상층 부재 17~28번을 이어 붙였고, 가장
+높은 지붕의 마루는 29번으로 맨 끝에 두었습니다.
+
+| # | 부재 | 담긴 형상 |
+| --- | --- | --- |
+| 01 | 기단·월대 | 장대석 기단, 2단 월대, 계단, 홍예 기단 |
+| 02 | 마루·어좌 | 우물마루와 귀틀, 어좌와 닫집 |
+| 03 | 초석 | 기둥 밑 둥근 주춧돌 |
+| 04 | 기둥 | 하층 원기둥 |
+| 05 | 벽체 | 하층 회벽, 하방·상방 (트인 누정에는 없음) |
+| 06 | 창호·난간 | 꽃살문, 교창, 마루 난간 |
+| 07 | 창방·평방 | 하층 기둥머리를 잇는 창방, 포를 받는 평방 링 |
+| 08 | 가구·천장 | 대들보, 대공, 흑천장, 육각 정자의 육각보 |
+| 09 | 공포 | 하층 주두·첨차·살미로 짜인 주상포·주간포 |
+| 10 | 도리·장혀 | 하층 외목도리·중도리·종도리와 그 아래 장혀 |
+| 11 | 서까래 | 하층 처마 도리에서 내려온 서까래 필드 |
+| 12 | 부연·평고대 | 하층 서까래 끝에 덧낸 부연과 처마 끝 평고대 |
+| 13 | 추녀·사래 | 하층 모서리를 타고 오르는 추녀와 사래 |
+| 14 | 지붕 골조 | 개판·산자·진흙으로 만든 지붕 곡면. 단층 건물의 지붕, 중층 건물에서는 상층을 감싸는 스커트 지붕 |
+| 15 | 기와 | 지붕 골조를 덮은 암키와·수키와 면 (수키와는 0.62 m 간격의 둥근 줄로 솟아 있음) |
+| 16 | 막새·와당 | 처마 끝을 마감하는 암막새 띠와 수키와마다 붙은 육각 와당 |
+| 17 | 상층 마루 | 하층 지붕 위에 깐 상층 마루와 귀틀, 누마루 난간동자 |
+| 18 | 상층 기둥 | 상층 마루 위에 세운 가는 원기둥 |
+| 19 | 상층 벽체 | 상층 회벽·하방 (트인 누각에는 없음) |
+| 20 | 상층 창호·난간 | 상층 꽃살창과 교창, 누각의 난간 |
+| 21 | 상층 창방·평방 | 상층 기둥머리 창방, 평방 링, 편액 |
+| 22 | 상층 공포 | 상층 기둥 위 주상포·주간포 (하층보다 한 단 작게) |
+| 23 | 상층 도리·장혀 | 상층 도리·장혀 링 |
+| 24 | 상층 서까래 | 상층 도리에서 상층 지붕 밑으로 뻗은 서까래 |
+| 25 | 상층 부연·평고대 | 상층 처마를 한 겹 더 내민 부연과 평고대 |
+| 26 | 상층 추녀·사래 | 상층 지붕 모서리의 추녀와 사래 |
+| 27 | 상층 지붕 골조 | 상층 팔작지붕의 개판·산자 곡면 |
+| 28 | 상층 기와 | 상층 지붕 골조를 덮은 기와면 |
+| 29 | 상층 막새·와당 | 상층 처마 끝의 막새 띠와 와당 |
+| 30 | 용마루·취두 | 가장 높은 지붕의 용마루, 내림마루, 취두·잡상 |
+
+각 건물 `B_<id>` 아래에 `L0`~`L29` 빈 오브젝트가 있고(`L0`~`L15` 하층,
+`L16`~`L28` 상층, `L29` 용마루), 메시는 `(건물, 부재, 재질)` 단위로 병합되어
+있습니다. 뷰어는 이 빈 오브젝트의 `position.y`만 올려 분해하므로 드로우콜이
+늘지 않습니다.
+
+```ts
+// src/lib/palace/viewer.ts
+function explodeStep(i, count) { return 1.05 * (i / (count - 1)); } // 높이 대비 비율
+layer.position.y = lifts[i] * explode;                              // lifts 는 로드 시 계산
+```
+
+조립 상태에서 부재들은 서로 맞물려 있습니다(벽체가 보까지, 공포가 처마까지
+올라감). 그래서 로드할 때 각 부재의 바운딩 박스를 재고, 위 부재의 밑면이 아래
+부재의 윗면보다 항상 `건물 높이 × 3%` 만큼 위에 오도록 상승량을 다시 계산합니다.
+덕분에 100% 분해에서 서른 부재가 서로 파고들지 않고 깔끔하게 쌓입니다.
+
+막새는 기와 위에 얹히는 부재라 자기 지붕의 마루까지 밀려 올라가면 안 됩니다.
+GLB 노드의 `layer_ride` 추가 속성을 읽어, 기와와 같은 높이에 조금만 띄워
+함께 움직입니다.
+
+단층 전각은 상층 슬롯 13개가 비어 있습니다. 상승량을 슬롯 번호로만 매기면 빈
+자리 때문에 부재 간격이 눌리므로, 뷰어는 **형상이 있는 부재만 세어 순위를 매기고**
+그 순위로 상승량을 정합니다. 덕분에 단층 건물은 예전과 같은 1.05 × 높이 간격을
+유지하고, 중층 건물은 상층 부재까지 고르게 벌어집니다.
+
+트인 누정(경회루·향원정)에는 벽체가 없어 05번과 19번이 비어 있습니다. 이때 뷰어는
+`setIsolatedLayer`가 `false`를 돌려주고, UI는 "이 전각에는 상층 벽체 부재가 없습니다"라고
+안내합니다. 단층 전각에서는 상층 부재 자체를 목록에서 감춥니다.
+
+분해율이 18%를 넘으면 선택한 전각만 제 색으로 남기고 나머지 전각은 17% 투명도로
+물러납니다(이름표도 숨김). 분해하면 건물 높이의 두 배 가까이 쌓인 부품이 뒤쪽
+전각과 섞이지 않게 하기 위한 장치로, 분해를 0%로 되돌리면 원래대로 돌아옵니다.
+
+부재 하나를 고르면 나머지 부재는 **와이어프레임 구조선**으로 바뀝니다. 서른 겹을
+반투명으로 겹쳐 그리면 뿌옇게 뭉개지므로, 평면 음영 대신 삼각망 선만 남겨
+설계도처럼 읽히게 했습니다. 이때 카메라는 움직이지 않습니다 — 부재는 이미 분해된
+스택 안에서 제자리를 지키므로, 어느 부재가 어디에 물려 있는지 그대로 확인할 수
+있습니다.
+
+## 소스 구조
+
+```
+src/
+├── app/
+│   ├── layout.tsx          메타데이터·폰트·전역 스타일
+│   ├── page.tsx            정적 셸 + PalaceStage
+│   └── globals.css         테마 토큰, 슬라이더·스크롤바
+├── components/
+│   ├── PalaceStage.tsx     next/dynamic(ssr:false) 래퍼
+│   └── PalaceExperience.tsx  패널·부재 레일·슬라이더·시간대·이름표
+└── lib/palace/
+    ├── viewer.ts           Three.js 뷰어 (로드·부재 분해·카메라·픽킹)
+    ├── data.ts             전각 11곳, 부재 26종, 카메라/시간 프리셋
+    ├── types.ts            공용 타입
+    ├── sky.ts              하늘 셰이더, 별·달, 시간대 상태
+    └── scenery.ts          산맥 링, 지형, 연못, 꽃잎
+```
+
+### 렌더링 메모
+
+- **스카이**: 월드 좌표 방향을 그대로 쓰는 구형 셰이더. 시간대마다 상단·지평선·
+  지면 색과 태양 방향을 보간합니다.
+- **산맥**: 세 겹의 능선 링을 `ShaderMaterial`로 그려, 능선은 암회색, 산기슭은
+  안개색으로 이어지게 했습니다(원경의 공기 원근).
+- **그림자**: 태양 방향광 1개, 2048² 섀도맵, ±200m 직교 범위. 지면·박석·수면은
+  `castShadow`에서 제외해 셀프 섀도 아티팩트를 줄였습니다.
+- **분해 프레이밍**: 전각을 선택하면 현재 분해율에 맞춰 바운딩 박스를 계산해
+  카메라를 재배치합니다. 슬라이더를 움직이면 부재가 프레임 밖으로 나가지 않도록
+  부드럽게 따라갑니다(사용자가 직접 회전·확대한 뒤에는 개입하지 않음). 스택이
+  건물 높이의 1.45배를 넘으면 카메라를 낮은 각도로 잡아, 들린 부품이 뒤쪽 전각이
+  아니라 하늘을 배경으로 읽히게 합니다.
+- **이름표**: 화면 좌표로 투영한 뒤 겹치는 라벨을 그리디하게 걸러 냅니다.
+- **성능**: 메시는 재질 단위로 병합되어 있고, 고스트 처리도 재질을 새로 만들지 않고
+  투명도·`depthWrite`·`wireframe` 플래그만 바꿉니다.
+
+## 크레딧
+
+- 궁궐 배치와 전각 비례는 《경복궁》 실측 도면·사진을 참고해 단순화했습니다.
+- 모델·텍스처·코드는 모두 이 저장소에서 절차적으로 생성됩니다.
