@@ -1,0 +1,338 @@
+{
+  "name": "Gyeongbokgung",
+  "ko": "경복궁",
+  "hanja": "景福宮",
+  "built": 2026,
+  "units": "meters",
+  "layers": [
+    {
+      "index": 0,
+      "key": "base",
+      "ko": "기단·월대",
+      "group": "lower"
+    },
+    {
+      "index": 1,
+      "key": "floor",
+      "ko": "마루",
+      "group": "lower"
+    },
+    {
+      "index": 2,
+      "key": "plinth",
+      "ko": "초석",
+      "group": "lower"
+    },
+    {
+      "index": 3,
+      "key": "column",
+      "ko": "기둥",
+      "group": "lower"
+    },
+    {
+      "index": 4,
+      "key": "wall",
+      "ko": "벽체",
+      "group": "lower"
+    },
+    {
+      "index": 5,
+      "key": "door",
+      "ko": "창호·난간",
+      "group": "lower"
+    },
+    {
+      "index": 6,
+      "key": "lintel",
+      "ko": "창방·평방",
+      "group": "lower"
+    },
+    {
+      "index": 7,
+      "key": "frame",
+      "ko": "가구·천장",
+      "group": "lower"
+    },
+    {
+      "index": 8,
+      "key": "bracket",
+      "ko": "공포",
+      "group": "lower"
+    },
+    {
+      "index": 9,
+      "key": "purlin",
+      "ko": "도리·장혀",
+      "group": "lower"
+    },
+    {
+      "index": 10,
+      "key": "rafter",
+      "ko": "서까래",
+      "group": "lower"
+    },
+    {
+      "index": 11,
+      "key": "eave",
+      "ko": "부연·평고대",
+      "group": "lower"
+    },
+    {
+      "index": 12,
+      "key": "hip",
+      "ko": "추녀·사래",
+      "group": "lower"
+    },
+    {
+      "index": 13,
+      "key": "roof",
+      "ko": "지붕 골조",
+      "group": "lower"
+    },
+    {
+      "index": 14,
+      "key": "tile",
+      "ko": "기와",
+      "group": "lower"
+    },
+    {
+      "index": 15,
+      "key": "maksae",
+      "ko": "막새·와당",
+      "group": "lower"
+    },
+    {
+      "index": 16,
+      "key": "upper_floor",
+      "ko": "상층 마루",
+      "group": "upper"
+    },
+    {
+      "index": 17,
+      "key": "upper_column",
+      "ko": "상층 기둥",
+      "group": "upper"
+    },
+    {
+      "index": 18,
+      "key": "upper_wall",
+      "ko": "상층 벽체",
+      "group": "upper"
+    },
+    {
+      "index": 19,
+      "key": "upper_door",
+      "ko": "상층 창호·난간",
+      "group": "upper"
+    },
+    {
+      "index": 20,
+      "key": "upper_lintel",
+      "ko": "상층 창방·평방",
+      "group": "upper"
+    },
+    {
+      "index": 21,
+      "key": "upper_bracket",
+      "ko": "상층 공포",
+      "group": "upper"
+    },
+    {
+      "index": 22,
+      "key": "upper_purlin",
+      "ko": "상층 도리·장혀",
+      "group": "upper"
+    },
+    {
+      "index": 23,
+      "key": "upper_rafter",
+      "ko": "상층 서까래",
+      "group": "upper"
+    },
+    {
+      "index": 24,
+      "key": "upper_eave",
+      "ko": "상층 부연·평고대",
+      "group": "upper"
+    },
+    {
+      "index": 25,
+      "key": "upper_hip",
+      "ko": "상층 추녀·사래",
+      "group": "upper"
+    },
+    {
+      "index": 26,
+      "key": "upper_roof",
+      "ko": "상층 지붕 골조",
+      "group": "upper"
+    },
+    {
+      "index": 27,
+      "key": "upper_tile",
+      "ko": "상층 기와",
+      "group": "upper"
+    },
+    {
+      "index": 28,
+      "key": "upper_maksae",
+      "ko": "상층 막새·와당",
+      "group": "upper"
+    },
+    {
+      "index": 29,
+      "key": "ridge",
+      "ko": "용마루·취두",
+      "group": "cap"
+    }
+  ],
+  "buildings": [
+    {
+      "building_id": "gwanghwamun",
+      "ko": "광화문",
+      "hanja": "光化門",
+      "kind": "gate",
+      "year": "1395 · 1867 중건",
+      "tiers": 2,
+      "x": 0,
+      "y": -156,
+      "sign_note": "사직로 방면 정문",
+      "height": 32.4,
+      "width": 38,
+      "depth": 14
+    },
+    {
+      "building_id": "heungnyemun",
+      "ko": "흥례문",
+      "hanja": "興禮門",
+      "kind": "gate",
+      "year": "1395 · 1867 중건",
+      "tiers": 1,
+      "x": 0,
+      "y": -100,
+      "height": 19.66,
+      "width": 26,
+      "depth": 11
+    },
+    {
+      "building_id": "geunjeongmun",
+      "ko": "근정문",
+      "hanja": "勤政門",
+      "kind": "gate",
+      "year": "1395 · 1867 중건",
+      "tiers": 1,
+      "x": 0,
+      "y": -52,
+      "height": 21.16,
+      "width": 32,
+      "depth": 12
+    },
+    {
+      "building_id": "geunjeongjeon",
+      "ko": "근정전",
+      "hanja": "勤政殿",
+      "kind": "hall",
+      "year": "1395 · 1867 중건",
+      "tiers": 2,
+      "x": 0,
+      "y": 8,
+      "sign_note": "조선 왕조의 정전",
+      "height": 29.94,
+      "width": 30,
+      "depth": 21
+    },
+    {
+      "building_id": "sajeongjeon",
+      "ko": "사정전",
+      "hanja": "思政殿",
+      "kind": "hall",
+      "year": "1395 · 1867 중건",
+      "tiers": 1,
+      "x": 0,
+      "y": 68,
+      "height": 15.21,
+      "width": 22,
+      "depth": 15
+    },
+    {
+      "building_id": "gangnyeongjeon",
+      "ko": "강녕전",
+      "hanja": "康寧殿",
+      "kind": "hall",
+      "year": "1395 · 1867 중건",
+      "tiers": 1,
+      "x": 0,
+      "y": 100,
+      "height": 16.01,
+      "width": 28,
+      "depth": 17
+    },
+    {
+      "building_id": "gyotaejeon",
+      "ko": "교태전",
+      "hanja": "交泰殿",
+      "kind": "hall",
+      "year": "1440 · 1867 중건",
+      "tiers": 1,
+      "x": 0,
+      "y": 134,
+      "height": 15.21,
+      "width": 22,
+      "depth": 15
+    },
+    {
+      "building_id": "jagyeongjeon",
+      "ko": "자경전",
+      "hanja": "慈慶殿",
+      "kind": "hall",
+      "year": "1865",
+      "tiers": 1,
+      "x": 48,
+      "y": 96,
+      "height": 14.51,
+      "width": 20,
+      "depth": 14
+    },
+    {
+      "building_id": "sujeongjeon",
+      "ko": "수정전",
+      "hanja": "修政殿",
+      "kind": "hall",
+      "year": "1867",
+      "tiers": 1,
+      "x": -45,
+      "y": 104,
+      "height": 14.31,
+      "width": 20,
+      "depth": 14
+    },
+    {
+      "building_id": "gyeonghoeru",
+      "ko": "경회루",
+      "hanja": "慶會樓",
+      "kind": "pavilion",
+      "year": "1412 · 1867 중건",
+      "tiers": 2,
+      "x": -82,
+      "y": 20,
+      "sign_note": "누각 · 연회와 외교의 장소",
+      "height": 21.04,
+      "width": 26,
+      "depth": 18
+    },
+    {
+      "building_id": "hyangwonjeong",
+      "ko": "향원정",
+      "hanja": "香遠亭",
+      "kind": "pavilion",
+      "year": "1873",
+      "tiers": 2,
+      "x": 58,
+      "y": 146,
+      "sign_note": "육각형 정자 · 향원지",
+      "height": 15.92,
+      "width": 8.8,
+      "depth": 8.8
+    }
+  ]
+}
